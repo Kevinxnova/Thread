@@ -229,7 +229,7 @@ private final class MirrorFrameSink: NSObject, SCStreamOutput, SCStreamDelegate 
         pageChecking = true; defer { pageChecking = false }
         let generation = pageGeneration
         let actual: String? = await withCheckedContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async {
+            DispatchQueue.global(qos: .userInitiated).async { [record] in
                 continuation.resume(returning: (try? BrowserBridge.source(for: record))?.url)
             }
         }
@@ -316,7 +316,7 @@ private final class MirrorFrameSink: NSObject, SCStreamOutput, SCStreamDelegate 
             try stream.addStreamOutput(sink, type: .screen, sampleHandlerQueue: DispatchQueue(label: "com.kevin.thread.mirror.\(source.windowID)", qos: .userInitiated))
             try await stream.startCapture()
             if closed { try? await stream.stopCapture(); return }
-            timer = Timer.scheduledTimer(withTimeInterval: 0.75, repeats: true) { [weak self] _ in Task { @MainActor in await self?.checkSource() } }
+            timer = Timer.scheduledTimer(withTimeInterval: 0.75, repeats: true) { [weak self] _ in Task { @MainActor [weak self] in await self?.checkSource() } }
             lab?.log("capture-start source=\(source.windowID)")
         } catch { fail("无法开始镜像：\(error.localizedDescription)") }
     }
