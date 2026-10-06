@@ -1,2 +1,3 @@
 # Thread
-留住思路，随时继续
+Pick up where you left off.
+留住思路，随时继续。
